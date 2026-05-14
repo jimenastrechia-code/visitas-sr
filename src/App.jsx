@@ -426,7 +426,20 @@ export default function App() {
   const [eiDesc,setEiDesc]=useState("");
   const [eiPhotos,setEiPhotos]=useState([]);
   const [showAddInEdit,setShowAddInEdit]=useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth<640);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth>=640);
 
+  useEffect(()=>{
+    function handleResize(){
+      const mobile=window.innerWidth<640;
+      setIsMobile(mobile);
+      if(!mobile) setSidebarOpen(true);
+    }
+    window.addEventListener("resize",handleResize);
+    return ()=>window.removeEventListener("resize",handleResize);
+  },[]);
+
+  function navAndClose(fn) { fn(); if(isMobile) setSidebarOpen(false); }
   /* ── Firebase listeners ── */
   function selectUser(u) {
     unsubRef.current.forEach(fn=>fn());
@@ -576,22 +589,6 @@ export default function App() {
       </div>
     </div>
   );
-
-  const SL=({children})=><div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#9ca3af",padding:"8px 18px 4px"}}>{children}</div>;
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 640);
-
-  useEffect(()=>{
-    function handleResize(){
-      const mobile = window.innerWidth < 640;
-      setIsMobile(mobile);
-      if(!mobile) setSidebarOpen(true);
-    }
-    window.addEventListener("resize", handleResize);
-    return ()=>window.removeEventListener("resize", handleResize);
-  },[]);
-
-  function navAndClose(fn) { fn(); if(isMobile) setSidebarOpen(false); }
 
   return (
     <div style={{display:"flex",minHeight:"100vh",fontFamily:"system-ui,sans-serif",background:"#f8f9fb",position:"relative"}}>
