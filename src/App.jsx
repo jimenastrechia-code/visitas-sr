@@ -430,26 +430,18 @@ export default function App() {
   /* ── Firebase listeners ── */
   function selectUser(u) {
     unsubRef.current.forEach(fn=>fn());
-    setCurrentUser(u); setLoaded(false);
+    setCurrentUser(u);
     setLocations([]); setVisits([]); setItems([]);
     setCustomAreas([]); setCustomTypes([]);
-    const uid=u.id;
-    const fired={locs:false,visits:false,items:false,cfg:false};
-    function check(){if(Object.values(fired).every(Boolean))setLoaded(true);}
-    // Timeout fallback: if Firebase doesn't respond in 8s, load anyway
-    const timeout = setTimeout(()=>setLoaded(true), 8000);
-    const onErr = (col) => (err) => {
-      console.error(`Firebase error (${col}):`, err);
-      if(!fired[col]){fired[col]=true;check();}
-    };
-    unsubRef.current=[
-      onSnapshot(uCol(uid,"locations"),snap=>{setLocations(snap.docs.map(d=>d.data()));if(!fired.locs){fired.locs=true;check();}},onErr("locs")),
-      onSnapshot(uCol(uid,"visits"),   snap=>{setVisits(snap.docs.map(d=>d.data()));   if(!fired.visits){fired.visits=true;check();}},onErr("visits")),
-      onSnapshot(uCol(uid,"items"),    snap=>{setItems(snap.docs.map(d=>d.data()));    if(!fired.items){fired.items=true;check();}},onErr("items")),
-      onSnapshot(uCfg(uid),snap=>{if(snap.exists()){const d=snap.data();setCustomAreas(d.customAreas||[]);setCustomTypes(d.customTypes||[]);}if(!fired.cfg){fired.cfg=true;check();}},onErr("cfg")),
-      ()=>clearTimeout(timeout),
-    ];
+    setLoaded(true);
     setView("dashboard");
+    const uid=u.id;
+    unsubRef.current=[
+      onSnapshot(uCol(uid,"locations"), snap=>setLocations(snap.docs.map(d=>d.data())), e=>console.error(e)),
+      onSnapshot(uCol(uid,"visits"),    snap=>setVisits(snap.docs.map(d=>d.data())),    e=>console.error(e)),
+      onSnapshot(uCol(uid,"items"),     snap=>setItems(snap.docs.map(d=>d.data())),     e=>console.error(e)),
+      onSnapshot(uCfg(uid), snap=>{ if(snap.exists()){const d=snap.data();setCustomAreas(d.customAreas||[]);setCustomTypes(d.customTypes||[]);} }, e=>console.error(e)),
+    ];
   }
   function logout(){
     unsubRef.current.forEach(fn=>fn()); unsubRef.current=[];
