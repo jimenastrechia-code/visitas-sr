@@ -579,28 +579,11 @@ export default function App() {
   );
 
   const SL=({children})=><div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#9ca3af",padding:"8px 18px 4px"}}>{children}</div>;
-  const isMobile = window.innerWidth < 640;
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-
-  function navAndClose(fn) { fn(); if(window.innerWidth<640) setSidebarOpen(false); }
 
   return (
-    <div style={{display:"flex",minHeight:"100vh",fontFamily:"system-ui,sans-serif",background:"#f8f9fb",position:"relative"}}>
-
-      {/* overlay for mobile */}
-      {sidebarOpen && window.innerWidth<640 && (
-        <div onClick={()=>setSidebarOpen(false)}
-          style={{position:"fixed",inset:0,background:"rgba(0,0,0,.35)",zIndex:40}}/>
-      )}
-
-      {/* hamburger button — always visible */}
-      <button onClick={()=>setSidebarOpen(o=>!o)}
-        style={{position:"fixed",top:12,left:12,zIndex:50,width:36,height:36,borderRadius:9,background:"#fff",border:"1px solid #e5e7eb",boxShadow:"0 1px 4px rgba(0,0,0,.1)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#374151"}}>
-        <i className={`ti ${sidebarOpen?"ti-x":"ti-menu-2"}`} style={{fontSize:17}} aria-hidden="true"/>
-      </button>
-
-      <aside style={{width:228,background:"#fff",borderRight:"1px solid #f3f4f6",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"2px 0 8px rgba(0,0,0,.06)",position:window.innerWidth<640?"fixed":"relative",top:0,left:0,height:"100vh",zIndex:45,transform:sidebarOpen?"translateX(0)":"translateX(-100%)",transition:"transform .22s ease"}}>
-        <div style={{padding:"20px 18px 16px",borderBottom:"1px solid #f3f4f6",paddingLeft:56}}>
+    <div style={{display:"flex",minHeight:"100vh",fontFamily:"system-ui,sans-serif",background:"#f8f9fb"}}>
+      <aside style={{width:228,background:"#fff",borderRight:"1px solid #f3f4f6",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"2px 0 8px rgba(0,0,0,.03)"}}>
+        <div style={{padding:"20px 18px 16px",borderBottom:"1px solid #f3f4f6"}}>
           <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:"#9ca3af",marginBottom:10}}>Regional SR</div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <div style={{width:36,height:36,borderRadius:"50%",background:currentUser.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#fff",flexShrink:0,boxShadow:`0 2px 8px ${currentUser.color}55`}}>{currentUser.avatar}</div>
@@ -612,31 +595,31 @@ export default function App() {
             </div>
           </div>
         </div>
-        <nav style={{flex:1,paddingTop:6,overflowY:"auto"}}>
+        <nav style={{flex:1,paddingTop:6}}>
           <SL>General</SL>
-          <NavBtn icon="ti-layout-dashboard" label="Inicio" active={view==="dashboard"} onClick={()=>navAndClose(()=>setView("dashboard"))} color={currentUser.color}/>
-          <NavBtn icon="ti-building-store" label="Mis Locales" active={["locations","location","editvisit"].includes(view)} onClick={()=>navAndClose(()=>setView("locations"))} color={currentUser.color}/>
+          <NavBtn icon="ti-layout-dashboard" label="Inicio" active={view==="dashboard"} onClick={()=>setView("dashboard")} color={currentUser.color}/>
+          <NavBtn icon="ti-building-store" label="Mis Locales" active={["locations","location","editvisit"].includes(view)} onClick={()=>setView("locations")} color={currentUser.color}/>
           <div style={{height:"1px",background:"#f3f4f6",margin:"8px 0"}}/>
           <SL>Seguimiento</SL>
           <NavBtn icon="ti-clock-exclamation" label="Pendientes" active={view==="pending"&&!showResolved} badge={openItems.length}
-            onClick={()=>navAndClose(()=>{setFArea("");setFType("");setFLoc("");setShowResolved(false);setView("pending");})} color={currentUser.color}/>
+            onClick={()=>{setFArea("");setFType("");setFLoc("");setShowResolved(false);setView("pending");}} color={currentUser.color}/>
           <NavBtn icon="ti-circle-check" label="Historial resueltos" active={view==="pending"&&showResolved} badge={resolvedItems.length}
-            onClick={()=>navAndClose(()=>{setFArea("");setFType("");setFLoc("");setShowResolved(true);setView("pending");})} color="#10b981"/>
-          <NavBtn icon="ti-chart-line" label="Histórico análisis" active={view==="analisis"} onClick={()=>navAndClose(()=>{setFLoc("");setView("analisis");})} color="#6366f1"/>
+            onClick={()=>{setFArea("");setFType("");setFLoc("");setShowResolved(true);setView("pending");}} color="#10b981"/>
+          <NavBtn icon="ti-chart-line" label="Histórico análisis" active={view==="analisis"} onClick={()=>{setFLoc("");setView("analisis");}} color="#6366f1"/>
           {!showResolved&&allAreas.slice(0,6).map(area=>{
             const n=openItems.filter(i=>i.area===area).length;
             return <NavBtn key={area} icon="ti-tag" label={area} sub active={view==="pending"&&fArea===area&&!showResolved} badge={n}
-              onClick={()=>navAndClose(()=>{setFArea(area);setFType("");setFLoc("");setShowResolved(false);setView("pending");})}/>;
+              onClick={()=>{setFArea(area);setFType("");setFLoc("");setShowResolved(false);setView("pending");}}/>;
           })}
           <div style={{height:"1px",background:"#f3f4f6",margin:"8px 0"}}/>
-          <NavBtn icon="ti-calendar-plus" label="Nueva Visita" active={view==="newvisit"} onClick={()=>navAndClose(()=>{setNvLocId("");setView("newvisit");})} color={currentUser.color}/>
+          <NavBtn icon="ti-calendar-plus" label="Nueva Visita" active={view==="newvisit"} onClick={()=>{setNvLocId("");setView("newvisit");}} color={currentUser.color}/>
         </nav>
         <div style={{padding:"12px 18px",borderTop:"1px solid #f3f4f6"}}>
           <div style={{fontSize:11,color:"#9ca3af"}}>{locations.length} locales · {visits.length} visitas</div>
         </div>
       </aside>
 
-      <main style={{flex:1,overflow:"auto",paddingTop:0,marginLeft:sidebarOpen&&window.innerWidth>=640?0:0}}>
+      <main style={{flex:1,overflow:"auto"}}>
 
         {/* DASHBOARD */}
         {view==="dashboard"&&(
