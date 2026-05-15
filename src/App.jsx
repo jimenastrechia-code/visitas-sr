@@ -78,34 +78,58 @@ function StatCard({label,value,icon,palette,onClick}) {
   </div>;
 }
 
+function Lightbox({src,onClose}) {
+  useEffect(()=>{
+    const esc=e=>{if(e.key==="Escape")onClose();};
+    document.addEventListener("keydown",esc);
+    return ()=>document.removeEventListener("keydown",esc);
+  },[onClose]);
+  return <div onClick={onClose}
+    style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <button onClick={onClose}
+      style={{position:"absolute",top:16,right:16,width:36,height:36,borderRadius:"50%",background:"rgba(255,255,255,.15)",border:"none",cursor:"pointer",color:"#fff",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+    <img src={src} alt="" onClick={e=>e.stopPropagation()}
+      style={{maxWidth:"100%",maxHeight:"90vh",borderRadius:10,boxShadow:"0 8px 40px rgba(0,0,0,.6)",objectFit:"contain"}}/>
+  </div>;
+}
+
 function PhotoPicker({photos=[],onChange,compact=false}) {
-  const ref=useRef(); const sz=compact?52:68;
+  const ref=useRef();
+  const [lightbox,setLightbox]=useState(null);
+  const sz=compact?52:68;
   async function handleFiles(e) {
     const files=Array.from(e.target.files); if(!files.length)return;
     const compressed=await Promise.all(files.map(compressImage));
     onChange([...photos,...compressed.map((d,i)=>({id:genId(),dataUrl:d,name:files[i].name}))]);
     e.target.value="";
   }
-  return <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
-    {photos.map(p=><div key={p.id} style={{position:"relative",width:sz,height:sz,flexShrink:0}}>
-      <img src={p.dataUrl} alt={p.name} onClick={()=>window.open(p.dataUrl,"_blank")}
-        style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:8,cursor:"pointer",border:"1px solid #e5e7eb"}}/>
-      <button onClick={()=>onChange(photos.filter(x=>x.id!==p.id))}
-        style={{position:"absolute",top:-5,right:-5,width:18,height:18,borderRadius:"50%",background:"#111",color:"#fff",border:"none",cursor:"pointer",fontSize:9,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-    </div>)}
-    <label style={{width:sz,height:sz,border:"1.5px dashed #d1d5db",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#9ca3af",gap:2,flexShrink:0,background:"#f9fafb"}}>
-      <i className="ti ti-camera-plus" style={{fontSize:compact?16:20}}/>
-      {!compact&&<span style={{fontSize:10}}>Foto</span>}
-      <input ref={ref} type="file" accept="image/*" multiple onChange={handleFiles} style={{display:"none"}}/>
-    </label>
-  </div>;
+  return <>
+    {lightbox&&<Lightbox src={lightbox} onClose={()=>setLightbox(null)}/>}
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+      {photos.map(p=><div key={p.id} style={{position:"relative",width:sz,height:sz,flexShrink:0}}>
+        <img src={p.dataUrl} alt={p.name} onClick={()=>setLightbox(p.dataUrl)}
+          style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:8,cursor:"zoom-in",border:"1px solid #e5e7eb"}}/>
+        <button onClick={()=>onChange(photos.filter(x=>x.id!==p.id))}
+          style={{position:"absolute",top:-5,right:-5,width:18,height:18,borderRadius:"50%",background:"#111",color:"#fff",border:"none",cursor:"pointer",fontSize:9,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+      </div>)}
+      <label style={{width:sz,height:sz,border:"1.5px dashed #d1d5db",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#9ca3af",gap:2,flexShrink:0,background:"#f9fafb"}}>
+        <i className="ti ti-camera-plus" style={{fontSize:compact?16:20}}/>
+        {!compact&&<span style={{fontSize:10}}>Foto</span>}
+        <input ref={ref} type="file" accept="image/*" multiple onChange={handleFiles} style={{display:"none"}}/>
+      </label>
+    </div>
+  </>;
 }
 function PhotoStrip({photos=[]}) {
+  const [lightbox,setLightbox]=useState(null);
   if(!photos?.length)return null;
-  return <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:8}}>
-    {photos.map(p=><img key={p.id} src={p.dataUrl} alt={p.name} onClick={()=>window.open(p.dataUrl,"_blank")}
-      style={{width:56,height:56,objectFit:"cover",borderRadius:8,cursor:"pointer",border:"1px solid #e5e7eb"}}/>)}
-  </div>;
+  return <>
+    {lightbox&&<Lightbox src={lightbox} onClose={()=>setLightbox(null)}/>}
+    <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:8}}>
+      {photos.map(p=><img key={p.id} src={p.dataUrl} alt={p.name} onClick={()=>setLightbox(p.dataUrl)}
+        style={{width:56,height:56,objectFit:"cover",borderRadius:8,cursor:"zoom-in",border:"1px solid #e5e7eb"}}/>)}
+    </div>
+  </>;
 }
 
 function BulletNotes({bullets,onChange,placeholder="Agregar punto…"}) {
